@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket.IO Chat</title>
+    <style>
+        #messages { list-style-type: none; }
+        #messages li { padding: 8px; margin-bottom: 10px; background: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <ol id="messages"></ol>
+    <form id="form">
+        <input id="user" autocomplete="off" placeholder="User" /><br/>
+        <input id="input" autocomplete="off" placeholder="Message" /><br/>
+        <button>Send</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const user = document.getElementById('user');
+        const messages = document.getElementById('messages');
+
+        // Display initial messages
+        socket.on('initialMessages', function(messages) {
+            messages.forEach(message => {
+                displayMessage(message);
+            });
+        });
+
+        // Display new messages
+        socket.on('message', function(message) {
+            displayMessage(message);
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value && user.value) {
+                const message = { user: user.value, message: input.value };
+                socket.emit('sendMessage', message);
+                input.value = '';
+                console.log('click')
+            }
+        });
+
+        function displayMessage(message) {
+            const item = document.createElement('li');
+            item.textContent = `${message.user}: ${message.message}`;
+           messages.appendChild(item);
+        }
+    </script>
+    <h1>this will be displayed on the browser1</h1>
+</body>
+</html>
