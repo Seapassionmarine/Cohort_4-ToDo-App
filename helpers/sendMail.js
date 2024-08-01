@@ -22,7 +22,7 @@ let mailOptions = {
     to: options.Email,
     subject: options.subject,
     // text: options.message
-  HTML:options.HTML
+    html:options.HTML
 //   
 }
   await transporter.sendMail(mailOptions)

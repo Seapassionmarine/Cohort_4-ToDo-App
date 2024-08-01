@@ -12,10 +12,10 @@ const todoSchema = new mongoose.Schema({
     },
     user:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Comments'
+        ref:'user'
     }
 },{timestamps:true})
 
-const todoModel = mongoose.model('Todo',todoSchema)
+const todoModel = mongoose.model('TodoList',todoSchema)
 
 module.exports = todoModel

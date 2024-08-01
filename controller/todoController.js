@@ -35,11 +35,20 @@ exports.createContent = async (req,res)=>{
 
 exports.getOneContent = async (req,res)=>{
     try {
-        
-    } catch (err) {
-        res.status(500).json(err.message)
-    }
-}
+        const userId = req.params.userId
+        const getOneContent = await todoModel.findOne({userId})
+        if(!getOneContent){
+            return res.status(404).json({
+                message:"content not found"
+            })
+        }
+        res.status(200).json({
+            message:"content below"
+        })
+       }catch (err) {
+                    res.status(500).json(err.message)
+                }
+            }
 
 exports.getAllContent = async (req,res)=>{
     try {

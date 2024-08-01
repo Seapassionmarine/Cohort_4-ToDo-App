@@ -1,12 +1,13 @@
 const express = require('express')
-const { createContent, getAllContent, getOneContent, deleteContent } = require('../controller/todoController')
+const { createContent, getAllContent, getOneContent, deleteContent, updateContent } = require('../controller/todoController')
 const { authenticate } = require('../middleware/auth')
 
-const todoRouter = express.Router()
+const router = express.Router()
 
-todoRouter.post('create-content',authenticate,createContent)
-todoRouter.get('/one-content',getOneContent)
-todoRouter.get('/all-content',getAllContent)
-todoRouter.delete('/delete-content',deleteContent)
+router.post('create-content',authenticate,createContent)
+router.get('/one-content/:todoId',authenticate,getOneContent)
+router.get('/all-content',authenticate,getAllContent)
+router.put('/update-content/:todoId',authenticate,updateContent)
+router.delete('/delete-content/:todoId',authenticate,deleteContent)
 
-module.exports = todoRouter
+module.exports = router

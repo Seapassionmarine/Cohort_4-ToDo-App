@@ -1,25 +1,14 @@
 const userModel = require('../model/userModel')
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const {sendMail} = require('../helpers/sendMail');
-const { signUpTemplate, verifyTemplate, forgotPasswordTemplate} = require('../helpers/HTML');
+const sendMail = require('../helpers/sendMail');
+const HTML = require ("../helpers/HTML")
+
+// const { signUpTemplate, verifyTemplate, forgotPasswordTemplate} = require('../helpers/HTML');
 
 exports.signUp = async (req, res) => {
     try {
         const { FullName,Email,Password } = req.body;
-        // if(!Email || !Password || !FullName){
-        //     return res.status(400).json({ 
-        //         message: `Please enter all details`
-        //     })
-        // }
-        // const EmailExists = await userModel.findOne({
-        //     Email: Email.toLowerCase()
-        // })
-        // if (!EmailExists) {
-        //     return res.status(400).json({
-        //         message: `Email already exists`
-        //     })
-        // }
         const existingUser = await userModel.findOne({Email});
         if (existingUser) {
             return res.status(400).json({
@@ -38,18 +27,17 @@ exports.signUp = async (req, res) => {
         //get the token to verify if user signs up
         const userToken = jwt.sign({ 
         id: user.Email,
-        // email: user.Email,
-        // Password:user.Password
+    
         }, process.env.JWT_SECRET,{ expiresIn: "1h" })
-        // user.token = token
+    
 
         const verifyLink = `${req.protocol}://${req.get("host")}/router/verify/${user._id}/${userToken}`
-        // console.log(userToken);
+    
 
         let mailOptions = {
             email: user.Email,
             subject: 'Verification email',
-            html: signUpTemplate(verifyLink, user.FullName),
+            html: HTML.signUpTemplate(verifyLink, user.FullName),
         }
 
         await user.save();
@@ -77,7 +65,7 @@ exports.logIn = async (req, res) => {
         const checkMail = await userModel.findOne({Email:Email.toLowerCase()});
         if (!checkMail) {
             return res.status(404).json({
-                message: 'User  with email not found'
+                message: 'User with email not found'
             })
         }
 
@@ -111,7 +99,7 @@ exports.logIn = async (req, res) => {
 exports.makeAdmin = async (req, res) => {
     try {
         const userId = req.params.id
-        const user = await UserModel.findById(userId);
+        const user = await userModel.findById(userId);
         if (!user) {
             return res.status(404).json({
                 message: 'User not found'
@@ -137,7 +125,7 @@ exports.verifyEmail = async (req, res) => {
         // Extract the email from the verified token
         const {Email} = jwt.verify(Token,process.env.JWT_SECRET);
         // Find the user with the email
-        const user = await UserModel.findOne({Email});
+        const user = await userModel.findOne({Email});
         // Check if the user is still in the database
         if (!user) {
             return res.status(404).json({
@@ -145,13 +133,13 @@ exports.verifyEmail = async (req, res) => {
             })
         }
         // Check if the user has already been verified
-        if (user.isVerified) {
+        if (user.isVerfied) {
             return res.status(400).json({
                 message: 'User already verified'
             })
         }
         // Verify the user
-        user.isVerified = true;
+        user.isVerfied = true;
         // Save the user data
         await user.save();
         // Send a success response
@@ -171,7 +159,7 @@ exports.resendVerificationEmail = async (req, res) => {
     try {
         const {Email} = req.body;
         // Find the user with the email
-        const user = await UserModel.findOne({Email});
+        const user = await userModel.findOne({Email});
         // Check if the user is still in the database
         if (!user) {
             return res.status(404).json({
@@ -179,7 +167,7 @@ exports.resendVerificationEmail = async (req, res) => {
             })
         }
         // Check if the user has already been verified
-        if (user.isVerified) {
+        if (user.isVerfied) {
             return res.status(400).json({
                 message: 'User already verified'
             })
@@ -190,7 +178,7 @@ exports.resendVerificationEmail = async (req, res) => {
         let mailOptions = {
             Email: user.Email,
             subject: 'Verification email',
-            HTML: verifyTemplate(verifyLink, user.FullName),
+            html: HTML.verifyTemplate(verifyLink, user.FullName),
         }
         // Send the the email
         await sendMail(mailOptions);
@@ -208,7 +196,7 @@ exports.ForgetPassword = async(req,res) =>{
     try {
         const {Email} = req.body
         // Find the user with the email
-        const user = await UserModel.findOne({Email});
+        const user = await userModel.findOne({Email});
         // Check if the user is still in the database
         if (!user) {
             return res.status(404).json({
@@ -222,7 +210,7 @@ exports.ForgetPassword = async(req,res) =>{
         const mailOptions = {
             Email: user.Email,
             subject: 'Reset password',
-            HTML:forgotPasswordTemplate(verifyLink,user.FullName)
+            html:HTML.forgotPasswordTemplate(verifyLink,user.FullName)
         }
 
         await sendMail(mailOptions)
@@ -244,7 +232,7 @@ exports.ResetPassword = async (req,res)=>{
         //confirm the new password
         const {Email} = jwt.verify(Token,process.env.JWT_SECRET)
         // Find the user with the email
-        const user = await UserModel.findOne({Email});
+        const user = await userModel.findOne({Email});
         // Check if the user is still in the database
         if (!user) {
             return res.status(404).json({
@@ -277,7 +265,7 @@ exports.changePassword = async(req,res)=>{
        const {Password,OldPassword} = req.body
        const {Email} = jwt.verify(Token.process.env.JWT_SECRET) 
        //check for user
-       const user = await UserModel.findOne({Email})
+       const user = await userModel.findOne({Email})
        if(!user){
         return res.status(400).json('User not found')
        }
@@ -307,7 +295,7 @@ exports.updateUser = async(req,res)=>{
         }
         const{FullName} = req.body
         const data = {FullName}
-        const update = await UserModel.findByIdAndUpdate(id,data,{new:true})
+        const update = await userModel.findByIdAndUpdate(id,data,{new:true})
         if(!update){
             return res.status(400).json({
                 message:`User with id does not exist`
