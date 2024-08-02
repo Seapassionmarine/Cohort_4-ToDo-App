@@ -27,7 +27,7 @@ exports.signUp = async (req, res) => {
         const userToken = jwt.sign({ id: user._id},process.env.JWT_SECRET,{expiresIn: "1h"})
         
         
-        const verifyLink = `${req.protocol}://${req.get("host")}/router/verify${user._id}/${userToken}`
+        const verifyLink = `https://cohort-4-todo-app-3.onrender.com/api/v1/user/verify/${userToken}`
         
         let mailOptions = {
             email: user.Email,
@@ -39,7 +39,7 @@ exports.signUp = async (req, res) => {
         await sendMail(mailOptions);
 
         res.status(201).json({
-            message: 'User created successfully',
+            message: 'User created successfully', 
             data: user
         })
 
@@ -98,6 +98,11 @@ exports.makeAdmin = async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 message: 'User not found'
+            })
+        }
+        if(!user.isVerfied){
+            return res.status(400).json({
+                message: `User not verified`
             })
         }
         user.isAdmin = true
@@ -169,9 +174,10 @@ exports.resendVerificationEmail = async (req, res) => {
         }
 
         const Token = jwt.sign({Email: user.Email }, process.env.JWT_SECRET, { expiresIn: '20mins' });
-        const verifyLink = `${req.protocol}://${req.get('host')}/api/v1/user/verify/${Token}`
+        const verifyLink = `https://cohort-4-todo-app-3.onrender.com/api/v1/user/verify/${Token}`
+
         let mailOptions = {
-            Email: user.Email,
+            email: user.Email,
             subject: 'Verification email',
             html: verifyTemplate(verifyLink, user.FullName),
         }
@@ -201,9 +207,9 @@ exports.ForgetPassword = async(req,res) =>{
 
         const ResetToken = jwt.sign({Email: user.Email }, process.env.JWT_SECRET, { expiresIn: '20mins' });
 
-        const verifyLink = `${req.protocol}://${req.get('host')}/api/v1/user/reset password/${ResetToken}`
+        const verifyLink = `https://cohort-4-todo-app-3.onrender.com/api/v1/user/reset-password/${ResetToken}`
         const mailOptions = {
-            Email: user.Email,
+            email: user.Email,
             subject: 'Reset password',
             html:forgotPasswordTemplate(verifyLink,user.FullName)
         }
@@ -239,7 +245,7 @@ exports.ResetPassword = async (req,res)=>{
         const hashedPassword = await bcryptjs.hash(Password, saltedeRounds);
 
         user.Password = hashedPassword
-        console.log(hashedPassword)
+        // console.log(hashedPassword)
 
         await user.save()
 
@@ -266,7 +272,7 @@ exports.changePassword = async(req,res)=>{
        }
        const verifyPassword = await bcryptjs.compare(OldPassword,user.Password)
        if(!verifyPassword){
-        return res.status(400).json('Password does not correspond with  the previous password')
+        return res.status(400).json('Password does not correspond with the previous password')
        }
        const saltedeRounds = await bcryptjs.genSalt(10)
        const hashedPassword = await bcryptjs.hash(Password,saltedeRounds)
