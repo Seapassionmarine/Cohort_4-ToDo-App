@@ -1,4 +1,4 @@
-exports.signUpTemplate=(verifyLink,FullName)=>{
+const signUpTemplate=(verifyLink,FullName)=>{
     return `
     
 <!DOCTYPE html>
@@ -79,7 +79,7 @@ exports.signUpTemplate=(verifyLink,FullName)=>{
     `
 }
 
-exports.forgotPasswordTemplate = (verifyLink, FullName) => {
+const forgotPasswordTemplate = (verifyLink, FullName) => {
     return `
     <!DOCTYPE html>
 <html>
@@ -158,7 +158,7 @@ exports.forgotPasswordTemplate = (verifyLink, FullName) => {
     `
 }
 
-exports.verifyTemplate = (verifyLink, FullName) => {
+const verifyTemplate = (verifyLink, FullName) => {
     return `
     <!DOCTYPE html>
 <html>
@@ -236,3 +236,5 @@ exports.verifyTemplate = (verifyLink, FullName) => {
 </html>
     `
 }
+
+module.exports = {signUpTemplate,verifyTemplate,forgotPasswordTemplate}

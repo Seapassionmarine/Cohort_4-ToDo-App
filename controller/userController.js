@@ -1,12 +1,11 @@
 const userModel = require('../model/userModel')
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const sendMail = require('../helpers/sendMail');
-const HTML = require ("../helpers/HTML")
-
-// const { signUpTemplate, verifyTemplate, forgotPasswordTemplate} = require('../helpers/HTML');
+const {sendMail} = require('../helpers/sendMail');
+const {signUpTemplate,verifyTemplate,forgotPasswordTemplate} = require('../helpers/HTML')
 
 exports.signUp = async (req, res) => {
+    console.log(sendMail);
     try {
         const { FullName,Email,Password } = req.body;
         const existingUser = await userModel.findOne({Email});
@@ -24,21 +23,19 @@ exports.signUp = async (req, res) => {
             Email,
             Password: hashedPassword
         })
+
         //get the token to verify if user signs up
-        const userToken = jwt.sign({ 
-        id: user.Email,
-    
-        }, process.env.JWT_SECRET,{ expiresIn: "1h" })
-    
-
-        const verifyLink = `${req.protocol}://${req.get("host")}/router/verify/${user._id}/${userToken}`
-    
-
+        const userToken = jwt.sign({ id: user._id},process.env.JWT_SECRET,{expiresIn: "1h"})
+        
+        
+        const verifyLink = `${req.protocol}://${req.get("host")}/router/verify${user._id}/${userToken}`
+        
         let mailOptions = {
             email: user.Email,
             subject: 'Verification email',
-            html: HTML.signUpTemplate(verifyLink, user.FullName),
+            html: signUpTemplate(verifyLink, user.FullName),
         }
+        console.log(user.Email);
 
         await user.save();
         await sendMail(mailOptions);
@@ -178,7 +175,7 @@ exports.resendVerificationEmail = async (req, res) => {
         let mailOptions = {
             Email: user.Email,
             subject: 'Verification email',
-            html: HTML.verifyTemplate(verifyLink, user.FullName),
+            html: verifyTemplate(verifyLink, user.FullName),
         }
         // Send the the email
         await sendMail(mailOptions);
@@ -210,7 +207,7 @@ exports.ForgetPassword = async(req,res) =>{
         const mailOptions = {
             Email: user.Email,
             subject: 'Reset password',
-            html:HTML.forgotPasswordTemplate(verifyLink,user.FullName)
+            html:forgotPasswordTemplate(verifyLink,user.FullName)
         }
 
         await sendMail(mailOptions)
