@@ -5,7 +5,6 @@ const {sendMail} = require('../helpers/sendMail');
 const {signUpTemplate,verifyTemplate,forgotPasswordTemplate} = require('../helpers/HTML')
 
 exports.signUp = async (req, res) => {
-    console.log(sendMail);
     try {
         const { FullName,Email,Password } = req.body;
         const existingUser = await userModel.findOne({Email});
@@ -14,16 +13,16 @@ exports.signUp = async (req, res) => {
                 message: 'User already exists'
             })
         }
-
+        
         const saltedeRounds = await bcryptjs.genSalt(10);
         const hashedPassword = await bcryptjs.hash(Password, saltedeRounds);
-
+        
         const user = new userModel({
             FullName,
             Email,
             Password: hashedPassword
         })
-
+        
         //get the token to verify if user signs up
         const userToken = jwt.sign({ id: user._id},process.env.JWT_SECRET,{expiresIn: "1h"})
         
@@ -35,7 +34,6 @@ exports.signUp = async (req, res) => {
             subject: 'Verification email',
             html: signUpTemplate(verifyLink, user.FullName),
         }
-        console.log(user.Email);
 
         await user.save();
         await sendMail(mailOptions);

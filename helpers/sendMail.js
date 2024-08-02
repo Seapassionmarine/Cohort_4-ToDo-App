@@ -17,10 +17,9 @@ const transporter = await nodeMailer.createTransport(
     
 )
 
-
 let mailOptions = {
     from: process.env.MAIL_ID ,
-    to: options.Email,
+    to: options.email,
     subject: options.subject,
     // text: options.message
   html:options.html
